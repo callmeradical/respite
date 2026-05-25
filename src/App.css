@@ -43,6 +43,164 @@
   --shadow-3: 0 8px 28px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
 }
 
+/* ─── Dark mode tokens ────────────────────────────────────────────────────── */
+/*
+ * Applied when:
+ *   1. User set theme = "dark"  →  [data-theme="dark"] on <html>
+ *   2. User set theme = "auto"  →  no data-theme attr, media query decides
+ * Light mode forced by [data-theme="light"], which blocks the media query.
+ */
+
+/* Shared dark token values — referenced by both selectors below */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --blue:        #0A84FF;
+    --blue-press:  #0070DC;
+    --blue-tint:   rgba(10, 132, 255, 0.18);
+    --green:       #30D158;
+    --green-tint:  rgba(48, 209, 88, 0.15);
+    --red:         #FF453A;
+    --red-tint:    rgba(255, 69, 58, 0.15);
+    --orange:      #FF9F0A;
+    --orange-tint: rgba(255, 159, 10, 0.15);
+    --purple:      #BF5AF2;
+    --teal:        #5AC8F5;
+    --indigo:      #7D7AFF;
+
+    --label-1:  #FFFFFF;
+    --label-2:  rgba(235, 235, 245, 0.60);
+    --label-3:  rgba(235, 235, 245, 0.30);
+    --label-4:  rgba(235, 235, 245, 0.18);
+
+    --fill-1:   rgba(120, 120, 128, 0.36);
+    --fill-2:   rgba(120, 120, 128, 0.24);
+    --fill-3:   rgba(118, 118, 128, 0.18);
+    --sep:      rgba(84, 84, 88, 0.65);
+    --sep-hard: #545458;
+
+    --bg:       #1C1C1E;
+    --surface:  #2C2C2E;
+
+    --shadow-1: 0 1px 3px rgba(0,0,0,0.40);
+    --shadow-2: 0 2px 10px rgba(0,0,0,0.50), 0 1px 3px rgba(0,0,0,0.30);
+    --shadow-3: 0 8px 28px rgba(0,0,0,0.60), 0 2px 8px rgba(0,0,0,0.40);
+
+    color-scheme: dark;
+  }
+}
+
+[data-theme="dark"] {
+  --blue:        #0A84FF;
+  --blue-press:  #0070DC;
+  --blue-tint:   rgba(10, 132, 255, 0.18);
+  --green:       #30D158;
+  --green-tint:  rgba(48, 209, 88, 0.15);
+  --red:         #FF453A;
+  --red-tint:    rgba(255, 69, 58, 0.15);
+  --orange:      #FF9F0A;
+  --orange-tint: rgba(255, 159, 10, 0.15);
+  --purple:      #BF5AF2;
+  --teal:        #5AC8F5;
+  --indigo:      #7D7AFF;
+
+  --label-1:  #FFFFFF;
+  --label-2:  rgba(235, 235, 245, 0.60);
+  --label-3:  rgba(235, 235, 245, 0.30);
+  --label-4:  rgba(235, 235, 245, 0.18);
+
+  --fill-1:   rgba(120, 120, 128, 0.36);
+  --fill-2:   rgba(120, 120, 128, 0.24);
+  --fill-3:   rgba(118, 118, 128, 0.18);
+  --sep:      rgba(84, 84, 88, 0.65);
+  --sep-hard: #545458;
+
+  --bg:       #1C1C1E;
+  --surface:  #2C2C2E;
+
+  --shadow-1: 0 1px 3px rgba(0,0,0,0.40);
+  --shadow-2: 0 2px 10px rgba(0,0,0,0.50), 0 1px 3px rgba(0,0,0,0.30);
+  --shadow-3: 0 8px 28px rgba(0,0,0,0.60), 0 2px 8px rgba(0,0,0,0.40);
+
+  color-scheme: dark;
+}
+
+/* ─── Dark mode component overrides ──────────────────────────────────────────
+ * Covers hardcoded colors in component CSS that don't use CSS variables.
+ * Grouped here to keep dark-mode logic in one place.
+ */
+
+/* Toolbar — darker translucent background */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .app-header {
+    background: rgba(28, 28, 30, 0.85);
+  }
+}
+[data-theme="dark"] .app-header {
+  background: rgba(28, 28, 30, 0.85);
+}
+
+/* Calendar pill text — tinted backgrounds need lighter text in dark mode */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .holiday-pill       { color: var(--orange); }
+  :root:not([data-theme="light"]) .pto-pill.pto-scheduled { color: var(--blue);  }
+  :root:not([data-theme="light"]) .pto-pill.pto-taken     { color: var(--green); }
+}
+[data-theme="dark"] .holiday-pill           { color: var(--orange); }
+[data-theme="dark"] .pto-pill.pto-scheduled { color: var(--blue);   }
+[data-theme="dark"] .pto-pill.pto-taken     { color: var(--green);  }
+
+/* Stat chips in optimizer / right panel */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .chip-total { color: var(--green);  }
+  :root:not([data-theme="light"]) .chip-pto   { color: var(--blue);   }
+  :root:not([data-theme="light"]) .chip-earn  { color: var(--orange); }
+  :root:not([data-theme="light"]) .ec-scheduled { color: var(--blue);  }
+  :root:not([data-theme="light"]) .ec-taken     { color: var(--green); }
+  :root:not([data-theme="light"]) .co-ok   { color: var(--green);  }
+  :root:not([data-theme="light"]) .co-over  { color: var(--red);   }
+  :root:not([data-theme="light"]) .mini-blue  { color: var(--blue);   }
+  :root:not([data-theme="light"]) .mini-green { color: var(--green);  }
+  :root:not([data-theme="light"]) .mini-teal  { color: var(--teal);   }
+}
+[data-theme="dark"] .chip-total    { color: var(--green);  }
+[data-theme="dark"] .chip-pto      { color: var(--blue);   }
+[data-theme="dark"] .chip-earn     { color: var(--orange); }
+[data-theme="dark"] .ec-scheduled  { color: var(--blue);   }
+[data-theme="dark"] .ec-taken      { color: var(--green);  }
+[data-theme="dark"] .co-ok         { color: var(--green);  }
+[data-theme="dark"] .co-over       { color: var(--red);    }
+[data-theme="dark"] .mini-blue     { color: var(--blue);   }
+[data-theme="dark"] .mini-green    { color: var(--green);  }
+[data-theme="dark"] .mini-teal     { color: var(--teal);   }
+
+/* Carryover badge text */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .carryover-badge.carryover-safe { color: var(--green); }
+  :root:not([data-theme="light"]) .carryover-badge.carryover-over { color: var(--red);   }
+}
+[data-theme="dark"] .carryover-badge.carryover-safe { color: var(--green); }
+[data-theme="dark"] .carryover-badge.carryover-over { color: var(--red);   }
+
+/* Recommendation efficiency colors */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .eff-great { color: var(--green); }
+  :root:not([data-theme="light"]) .eff-good  { color: var(--blue);  }
+}
+[data-theme="dark"] .eff-great { color: var(--green); }
+[data-theme="dark"] .eff-good  { color: var(--blue);  }
+
+/* Remaining tile green/red tints */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .remaining-ok   { border-left-color: var(--green); }
+  :root:not([data-theme="light"]) .remaining-over { border-left-color: var(--red);   }
+  :root:not([data-theme="light"]) .remaining-ok   .remaining-days { color: var(--green); }
+  :root:not([data-theme="light"]) .remaining-over .remaining-days { color: var(--red);   }
+}
+[data-theme="dark"] .remaining-ok                 { border-left-color: var(--green); }
+[data-theme="dark"] .remaining-over               { border-left-color: var(--red);   }
+[data-theme="dark"] .remaining-ok   .remaining-days { color: var(--green); }
+[data-theme="dark"] .remaining-over .remaining-days { color: var(--red);   }
+
 /* ─── Reset ───────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, #root       { height: 100%; width: 100%; overflow: hidden; }

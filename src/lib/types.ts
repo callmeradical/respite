@@ -1,6 +1,7 @@
 // ─── Domain types ─────────────────────────────────────────────────────────────
 
 export type PayPeriodCadence = 'biweekly' | 'semi_monthly';
+export type Theme = 'light' | 'dark' | 'auto';
 export type EntryType = 'pto' | 'holiday';
 export type EntryStatus = 'taken' | 'scheduled';
 
@@ -24,6 +25,8 @@ export interface Settings {
    * null = unlimited carryover.
    */
   carryover_limit_hours: number | null;
+  /** UI theme preference — 'light' | 'dark' | 'auto' (follows system) */
+  theme: Theme;
 }
 
 export interface TimeOffEntry {
@@ -59,7 +62,25 @@ export interface AccrualSummary {
   totalTaken: number;
   /** PTO entries with status = 'scheduled' (future) */
   totalScheduled: number;
-  /** openingBalance + totalAccrued − totalTaken − totalScheduled */
+  /**
+   * What you actually have in your account right now.
+   * = openingBalance + totalAccrued − totalTaken
+   * Does NOT deduct scheduled PTO.
+   */
+  availableNow: number;
+  /**
+   * Projected balance after every scheduled PTO event has been taken,
+   * crediting the accrual you will earn between now and each event.
+   * = availableNow + accrual(today → lastScheduledDate) − totalScheduled
+   *
+   * This is the "true" remaining balance once all planned time off is done.
+   */
+  projectedAfterScheduled: number;
+  /**
+   * @deprecated Use availableNow for the current balance.
+   * Kept for backward-compat with optimizer / forecast code that reads it.
+   * = availableNow − totalScheduled  (conservative: treats all PTO as spent today)
+   */
   remaining: number;
   /** Number of complete pay periods elapsed */
   periodsElapsed: number;

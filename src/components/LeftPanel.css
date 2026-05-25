@@ -75,6 +75,61 @@
   font-variant-numeric: tabular-nums;
 }
 
+.remaining-sublabel {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--label-3);
+  margin-top: 1px;
+}
+
+/* ── Projected after scheduled ── */
+.projected-card {
+  background: var(--fill-3);
+  border-radius: var(--r-sm);
+  padding: 8px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.projected-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.projected-label {
+  font-size: 11px;
+  color: var(--label-2);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.projected-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--label-1);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  text-align: right;
+}
+
+.projected-hrs {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--label-3);
+  letter-spacing: 0;
+}
+
+.projected-note {
+  font-size: 10px;
+  color: var(--label-3);
+  font-style: italic;
+}
+
 .co-badge {
   font-size: 10px;
   font-weight: 600;

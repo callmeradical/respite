@@ -30,7 +30,8 @@ export async function saveSettings(s: Omit<Settings, 'id'>): Promise<void> {
        opening_balance       = $4,
        max_balance_days      = $5,
        hours_per_day         = $6,
-       carryover_limit_hours = $7
+       carryover_limit_hours = $7,
+       theme                 = $8
      WHERE id = 1`,
     [
       s.pay_period_cadence,
@@ -40,6 +41,7 @@ export async function saveSettings(s: Omit<Settings, 'id'>): Promise<void> {
       s.max_balance_days ?? null,
       s.hours_per_day,
       s.carryover_limit_hours ?? null,
+      s.theme ?? 'auto',
     ],
   );
 }

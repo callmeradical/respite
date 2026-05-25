@@ -22,17 +22,23 @@ export default function LeftPanel({
 }: Props) {
   const {
     totalAccrued, openingBalance, totalTaken, totalScheduled,
-    remaining, periodsElapsed, ratePerPeriod,
+    availableNow, projectedAfterScheduled, periodsElapsed, ratePerPeriod,
   } = summary;
 
   const hpd           = settings.hours_per_day ?? 8;
   const carryoverDays = settings.carryover_limit_hours != null
     ? settings.carryover_limit_hours / hpd : null;
-  const isOver        = carryoverDays != null && remaining > carryoverDays;
 
-  const total              = openingBalance + totalAccrued;
-  const takenFrac          = total > 0 ? Math.min(totalTaken              / total, 1) : 0;
-  const scheduledFrac      = total > 0 ? Math.min(totalScheduled          / total, 1 - takenFrac) : 0;
+  // Carryover check is against what you'll actually have, not the stale "remaining"
+  const isOver = carryoverDays != null && availableNow > carryoverDays;
+
+  // Progress bar: taken + scheduled against total ever accrued
+  const total         = openingBalance + totalAccrued;
+  const takenFrac     = total > 0 ? Math.min(totalTaken     / total, 1) : 0;
+  const scheduledFrac = total > 0 ? Math.min(totalScheduled / total, 1 - takenFrac) : 0;
+
+  const hasScheduled  = totalScheduled > 0;
+  const projImproves  = projectedAfterScheduled > availableNow - totalScheduled;
 
   return (
     <div className="left-panel">
@@ -41,24 +47,43 @@ export default function LeftPanel({
       <div className="lp-section">
         <span className="lp-label">Balance</span>
 
-        {/* Remaining — the headline number */}
+        {/* Available now — the real current account balance */}
         <div className={`remaining-card ${isOver ? 'remaining-over' : 'remaining-ok'}`}>
           <div className="remaining-row">
             <span className="remaining-days">
-              {fmt(remaining)}
+              {fmt(availableNow)}
               <span className="remaining-unit">d</span>
             </span>
-            <span className="remaining-hrs">{fmt(remaining * hpd)} hrs</span>
+            <span className="remaining-hrs">{fmt(availableNow * hpd)} hrs</span>
           </div>
+          <span className="remaining-sublabel">available now</span>
 
           {carryoverDays != null && (
             <span className={`co-badge ${isOver ? 'co-over' : 'co-ok'}`}>
               {isOver
-                ? `▲ ${fmt((remaining - carryoverDays) * hpd)} hrs over`
+                ? `▲ ${fmt((availableNow - carryoverDays) * hpd)} hrs over`
                 : `✓ ≤ ${settings.carryover_limit_hours} hr limit`}
             </span>
           )}
         </div>
+
+        {/* Projected after all scheduled PTO — the forward-looking number */}
+        {hasScheduled && (
+          <div className="projected-card">
+            <div className="projected-row">
+              <span className="projected-label">After all planned PTO</span>
+              <span className="projected-value">
+                {fmt(projectedAfterScheduled)}d
+                <span className="projected-hrs"> / {fmt(projectedAfterScheduled * hpd)} hrs</span>
+              </span>
+            </div>
+            {projImproves && (
+              <span className="projected-note">
+                Includes accrual before each event
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Mini stats */}
         <div className="mini-stats">

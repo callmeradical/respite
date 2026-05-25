@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Settings } from '../lib/types';
+import type { Settings, Theme } from '../lib/types';
 import { saveSettings } from '../lib/db';
 import './Settings.css';
 
@@ -18,6 +18,7 @@ export default function SettingsPanel({ settings, onSaved, onClose }: Props) {
     max_balance_days:      settings.max_balance_days,
     hours_per_day:         settings.hours_per_day ?? 8,
     carryover_limit_hours: settings.carryover_limit_hours,
+    theme:                 settings.theme ?? 'auto',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +53,22 @@ export default function SettingsPanel({ settings, onSaved, onClose }: Props) {
         </div>
 
         <div className="settings-body">
+
+          {/* ── Appearance ── */}
+          <div className="field-group">
+            <label>Appearance</label>
+            <div className="theme-picker">
+              {(['light', 'auto', 'dark'] as Theme[]).map((t) => (
+                <button
+                  key={t}
+                  className={`theme-option ${form.theme === t ? 'active' : ''}`}
+                  onClick={() => setForm(f => ({ ...f, theme: t }))}
+                >
+                  {t === 'light' ? '☀ Light' : t === 'dark' ? '☽ Dark' : '⬤ Auto'}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* ── Pay period cadence ── */}
           <fieldset>

@@ -62,6 +62,17 @@ export default function App() {
     if (settings) setSummary(computeAccrual(settings, entries));
   }, [settings, entries]);
 
+  // Apply theme preference to the document root so CSS can react
+  useEffect(() => {
+    const root = document.documentElement;
+    const theme = settings?.theme ?? 'auto';
+    if (theme === 'auto') {
+      root.removeAttribute('data-theme');
+    } else {
+      root.setAttribute('data-theme', theme);
+    }
+  }, [settings?.theme]);
+
   // ── ICS export ──────────────────────────────────────────────────────────────
   async function handleExportICS(selected: TimeOffEntry[]) {
     const ics = generateICS(selected);
@@ -201,6 +212,8 @@ export default function App() {
           defaultDate={modal.date}
           defaultEndDate={modal.endDate}
           holidays={holidays}
+          settings={settings}
+          entries={entries}
           onSaved={handleSaved}
           onClose={closeModal}
         />
@@ -210,6 +223,8 @@ export default function App() {
         <EntryModal
           editEntry={modal.entry}
           holidays={holidays}
+          settings={settings}
+          entries={entries}
           onSaved={handleSaved}
           onClose={closeModal}
         />
@@ -220,6 +235,8 @@ export default function App() {
           editHoliday={modal.holiday}
           defaultMode="holiday"
           holidays={holidays}
+          settings={settings}
+          entries={entries}
           onSaved={handleSaved}
           onClose={closeModal}
         />

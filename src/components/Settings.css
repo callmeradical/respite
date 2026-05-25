@@ -34,6 +34,35 @@
   max-height: 62vh;
 }
 
+/* ── Theme picker ── */
+.theme-picker {
+  display: flex;
+  gap: 0;
+  background: var(--fill-2);
+  border-radius: var(--r-sm);
+  padding: 3px;
+}
+
+.theme-option {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--r-sm) - 2px);
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--label-2);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s, color 0.12s, box-shadow 0.12s;
+}
+
+.theme-option.active {
+  background: var(--surface);
+  color: var(--label-1);
+  box-shadow: var(--shadow-1);
+}
+
 /* ── Grouped sections (fieldset) ── */
 fieldset {
   border: none;

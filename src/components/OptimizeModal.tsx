@@ -72,7 +72,7 @@ export default function OptimizeModal({
           <div>
             <h2>Time off optimizer</h2>
             <span className="opt-balance-pill">
-              {fmt(summary.remaining)} days available
+              {fmt(summary.availableNow)} days available
             </span>
           </div>
           <button className="icon-btn" onClick={onClose} aria-label="Close">&#10005;</button>

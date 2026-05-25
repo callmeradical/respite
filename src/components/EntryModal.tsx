@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { parseISO } from 'date-fns';
-import type { TimeOffEntry, Holiday, EntryType, EntryStatus } from '../lib/types';
+import { useState, useEffect, useMemo } from 'react';
+import { parseISO, format } from 'date-fns';
+import type { TimeOffEntry, Holiday, Settings, EntryType, EntryStatus } from '../lib/types';
 import { addEntry, updateEntry, deleteEntry, addHoliday, deleteHoliday } from '../lib/db';
-import { countWorkingDays, toIso } from '../lib/accrual';
+import { countWorkingDays, projectedBalanceAt, toIso } from '../lib/accrual';
 import './EntryModal.css';
 
 type Mode = 'entry' | 'holiday';
@@ -19,8 +19,16 @@ interface Props {
   /** Default modal mode */
   defaultMode?: Mode;
   holidays: Holiday[];
+  /** Needed for projected-balance validation */
+  settings: Settings;
+  /** All existing entries — used to compute committed PTO before the new event */
+  entries: TimeOffEntry[];
   onSaved: () => void;
   onClose: () => void;
+}
+
+function fmt(n: number): string {
+  return n % 1 === 0 ? String(n) : n.toFixed(2).replace(/\.?0+$/, '');
 }
 
 export default function EntryModal({
@@ -30,6 +38,8 @@ export default function EntryModal({
   editHoliday,
   defaultMode = 'entry',
   holidays,
+  settings,
+  entries,
   onSaved,
   onClose,
 }: Props) {
@@ -63,6 +73,26 @@ export default function EntryModal({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // ── Balance validation (PTO entries only) ──────────────────────────────────
+  const balanceAtStart = useMemo(() => {
+    if (mode !== 'entry' || !startDate) return null;
+    try {
+      return projectedBalanceAt(
+        parseISO(startDate),
+        settings,
+        entries,
+        editEntry?.id, // exclude the entry being edited from committed totals
+      );
+    } catch {
+      return null;
+    }
+  }, [mode, startDate, settings, entries, editEntry?.id]);
+
+  const insufficient = balanceAtStart !== null && days > balanceAtStart;
+  const startDateLabel = startDate
+    ? format(parseISO(startDate), 'MMM d')
+    : '';
 
   // Auto-calculate working days when dates change (unless user overrode)
   useEffect(() => {
@@ -243,6 +273,29 @@ export default function EntryModal({
                 </div>
               </div>
 
+              {/* Balance check */}
+              {balanceAtStart !== null && (
+                <div className={`balance-check ${insufficient ? 'balance-check-over' : 'balance-check-ok'}`}>
+                  {insufficient ? (
+                    <>
+                      <span className="bc-icon">⚠</span>
+                      <span className="bc-text">
+                        Only <strong>{fmt(balanceAtStart)}d</strong> available on {startDateLabel} —
+                        this entry needs <strong>{fmt(days)}d</strong>.
+                        You cannot schedule more PTO than you will have accrued.
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="bc-icon">✓</span>
+                      <span className="bc-text">
+                        <strong>{fmt(balanceAtStart)}d</strong> available on {startDateLabel}
+                      </span>
+                    </>
+                  )}
+                </div>
+              )}
+
               {/* Status */}
               <div className="field-group">
                 <label>Status</label>
@@ -341,7 +394,8 @@ export default function EntryModal({
             <button
               className="btn-primary"
               onClick={mode === 'entry' ? handleSaveEntry : handleSaveHoliday}
-              disabled={saving || (mode === 'holiday' && !holidayName)}
+              disabled={saving || (mode === 'holiday' && !holidayName) || insufficient}
+              title={insufficient ? 'Insufficient PTO balance on the selected date' : undefined}
             >
               {saving ? 'Saving…' : isEditEntry || isEditHoliday ? 'Save changes' : 'Add'}
             </button>

@@ -176,7 +176,8 @@ export function generateRecommendations(
   // Balance already in hand (accrued so far, minus taken).
   // We intentionally do NOT subtract scheduled PTO here — that will be
   // handled per-window so that future accrual is credited before future PTO.
-  const balanceNow = summary.openingBalance + summary.totalAccrued - summary.totalTaken;
+  // availableNow is openingBalance + totalAccrued − totalTaken, pre-computed
+  const balanceNow = summary.availableNow;
 
   const accrualStart = parseISO(settings.accrual_start_date);
   const periodsPerYear = settings.pay_period_cadence === 'biweekly' ? 26 : 24;

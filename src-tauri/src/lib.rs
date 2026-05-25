@@ -56,6 +56,12 @@ pub fn run() {
             ALTER TABLE settings ADD COLUMN carryover_limit_hours REAL;
         "#,
         kind: MigrationKind::Up,
+    },
+    Migration {
+        version: 3,
+        description: "add_theme_setting",
+        sql: "ALTER TABLE settings ADD COLUMN theme TEXT NOT NULL DEFAULT 'auto';",
+        kind: MigrationKind::Up,
     }];
 
     tauri::Builder::default()

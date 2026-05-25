@@ -123,11 +123,12 @@ describe('computeAccrual', () => {
     };
     const result = computeAccrual(settings, []);
     expect(result.totalAccrued).toBe(0);
+    expect(result.availableNow).toBe(0);
     expect(result.remaining).toBe(0);
     expect(result.periodsElapsed).toBe(0);
   });
 
-  it('credits the opening balance', () => {
+  it('credits the opening balance into availableNow', () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const settings: Settings = {
@@ -136,11 +137,11 @@ describe('computeAccrual', () => {
       opening_balance: 5,
     };
     const result = computeAccrual(settings, []);
-    expect(result.remaining).toBe(5);
+    expect(result.availableNow).toBe(5);
     expect(result.openingBalance).toBe(5);
   });
 
-  it('subtracts taken PTO from remaining', () => {
+  it('subtracts taken PTO from availableNow but not from projectedAfterScheduled when no scheduled', () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const settings: Settings = {
@@ -149,41 +150,46 @@ describe('computeAccrual', () => {
       opening_balance: 10,
     };
     const entries: TimeOffEntry[] = [{
-      id: '1',
-      entry_type: 'pto',
-      start_date: toIso(today),
-      end_date: toIso(today),
-      days: 3,
-      status: 'taken',
-      notes: null,
-      created_at: '',
+      id: '1', entry_type: 'pto',
+      start_date: toIso(today), end_date: toIso(today),
+      days: 3, status: 'taken', notes: null, created_at: '',
     }];
     const result = computeAccrual(settings, entries);
     expect(result.totalTaken).toBe(3);
+    expect(result.availableNow).toBe(7);
     expect(result.remaining).toBe(7);
+    // No scheduled PTO → projected equals availableNow
+    expect(result.projectedAfterScheduled).toBe(7);
   });
 
-  it('subtracts scheduled PTO from remaining', () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  it('remaining is the conservative today-only figure; projectedAfterScheduled credits future accrual', () => {
+    // Start date 1 year ago so there's a meaningful accrual period to project into
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    oneYearAgo.setHours(0, 0, 0, 0);
+
+    const sixMonthsFromNow = new Date();
+    sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+    sixMonthsFromNow.setHours(0, 0, 0, 0);
+
     const settings: Settings = {
       ...BASE_SETTINGS,
-      accrual_start_date: toIso(today),
-      opening_balance: 8,
+      accrual_start_date: toIso(oneYearAgo),
+      opening_balance: 0,
     };
     const entries: TimeOffEntry[] = [{
-      id: '2',
-      entry_type: 'pto',
-      start_date: toIso(today),
-      end_date: toIso(today),
-      days: 2,
-      status: 'scheduled',
-      notes: null,
-      created_at: '',
+      id: '2', entry_type: 'pto',
+      start_date: toIso(sixMonthsFromNow), end_date: toIso(sixMonthsFromNow),
+      days: 5, status: 'scheduled', notes: null, created_at: '',
     }];
     const result = computeAccrual(settings, entries);
-    expect(result.totalScheduled).toBe(2);
-    expect(result.remaining).toBe(6);
+
+    // remaining is conservative (no future accrual)
+    expect(result.remaining).toBe(result.availableNow - 5);
+
+    // projected should be HIGHER than remaining because 6 months of accrual
+    // will happen before the scheduled PTO fires
+    expect(result.projectedAfterScheduled).toBeGreaterThan(result.remaining);
   });
 
   it('computes correct rate per period (15 days / 26 periods, rounded to 2dp)', () => {

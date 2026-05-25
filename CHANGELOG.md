@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0] — 2026-05-25
+
+### Added
+- **Dark mode** — Light / Auto (follows system) / Dark picker in Settings; full Apple dark-mode token set with `color-scheme: dark`; toolbar, calendar pills, stat chips, and balance indicators all adapt correctly
+- **Accurate "Available now" balance** — the balance tile now shows what you actually hold today (not today's balance minus all future scheduled PTO); a second row shows the projected balance after all planned PTO fires, crediting the accrual you'll earn before each event
+- **PTO scheduling validation** — when adding or editing a PTO entry the modal computes `projectedBalanceAt(startDate)` in real-time; shows a green ✓ or red ⚠ indicator with exact day counts; the save button is disabled when the entry would exceed the projected available balance at the chosen start date
+- **ICS export picker** — choose exactly which events to export; scheduled pre-selected, taken opt-in; per-section All / None shortcuts
+- **Optimizer budget fix** — recommendations are now evaluated against `availableNow + accrual(today → windowStart) − committed PTO before window`, so windows requiring days not yet accrued are correctly surfaced rather than hidden
+
+### Fixed
+- `docs/package.json` missing `"type": "module"` — VitePress CI was failing with ESM load error
+- Optimizer `balanceNow` was redundantly re-computing `openingBalance + accrued − taken`; now reads `summary.availableNow` directly
+
 ## [1.1.0] — 2026-05-25
 
 ### Added

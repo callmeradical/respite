@@ -84,6 +84,37 @@
 }
 .input-hint-row input { width: 90px !important; }
 
+/* ── Balance availability check ── */
+.balance-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.balance-check-ok {
+  background: var(--green-tint);
+  color: #1a7f37;
+}
+
+.balance-check-over {
+  background: var(--red-tint);
+  color: var(--red);
+}
+
+.bc-icon {
+  flex-shrink: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.bc-text strong {
+  font-weight: 700;
+}
+
 /* ── Footer ── */
 .modal-footer {
   display: flex;
