@@ -1,0 +1,26 @@
+# Node / npm
+node_modules/
+dist/
+.env
+.env.local
+*.local
+
+# Tauri build artifacts (multi-GB, don't commit)
+src-tauri/target/
+
+# Tauri icon source (generated files are committed, source SVG is not needed in repo)
+# src-tauri/icons/app-icon.svg  ← keep this, it's the source of truth
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Test coverage
+coverage/

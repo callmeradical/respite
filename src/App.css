@@ -1,0 +1,487 @@
+/* ─── Apple design tokens ─────────────────────────────────────────────────── */
+:root {
+  /* System accent colors (HIG) */
+  --blue:        #007AFF;
+  --blue-press:  #0051D5;
+  --blue-tint:   #EBF5FF;
+  --green:       #34C759;
+  --green-tint:  #E8F8EC;
+  --red:         #FF3B30;
+  --red-tint:    #FFF0EF;
+  --orange:      #FF9500;
+  --orange-tint: #FFF4E0;
+  --purple:      #AF52DE;
+  --indigo:      #5856D6;
+  --teal:        #32ADE6;
+
+  /* Label hierarchy */
+  --label-1:  #000000;
+  --label-2:  rgba(60, 60, 67, 0.60);
+  --label-3:  rgba(60, 60, 67, 0.30);
+  --label-4:  rgba(60, 60, 67, 0.18);
+
+  /* Fill / surface */
+  --fill-1:   rgba(120, 120, 128, 0.20);
+  --fill-2:   rgba(120, 120, 128, 0.12);
+  --fill-3:   rgba(118, 118, 128, 0.08);
+  --sep:      rgba(60, 60, 67, 0.12);
+  --sep-hard: #D1D1D6;
+
+  /* Backgrounds */
+  --bg:       #F2F2F7;
+  --surface:  #FFFFFF;
+
+  /* Geometry */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+
+  /* Elevation */
+  --shadow-1: 0 1px 3px rgba(0,0,0,0.07);
+  --shadow-2: 0 2px 10px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-3: 0 8px 28px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* ─── Reset ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root       { height: 100%; width: 100%; overflow: hidden; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--label-1);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── App shell ───────────────────────────────────────────────────────────── */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Three-column body */
+.app-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Panel wrappers — animate width for push-style drawer */
+.panel-wrap {
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: width 0.22s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.panel-left-wrap  { width: 220px; }
+.panel-right-wrap { width: 252px; }
+.panel-wrap.panel-closed { width: 0; }
+
+/* Calendar fills the space between the two panels */
+.cal-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Toolbar ─────────────────────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  /* 76px = 12px margin + ~64px for traffic light buttons */
+  padding: 0 16px 0 76px;
+  background: rgba(246, 246, 246, 0.80);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border-bottom: 0.5px solid var(--sep);
+  flex-shrink: 0;
+  /* Entire bar is a drag handle; interactive children opt out below */
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-logo {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--label-1);
+  letter-spacing: -0.01em;
+}
+
+.app-tagline {
+  font-size: 11px;
+  color: var(--label-3);
+  padding-left: 2px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  -webkit-app-region: no-drag;
+}
+
+/* ─── Button system ───────────────────────────────────────────────────────── */
+
+/* Filled — primary action */
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 5px 13px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s, opacity 0.12s;
+  -webkit-app-region: no-drag;
+}
+.btn-primary:hover:not(:disabled) { background: var(--blue-press); }
+.btn-primary:disabled              { opacity: 0.35; cursor: not-allowed; }
+
+/* Borderless tinted — secondary action */
+.btn-ghost {
+  background: transparent;
+  color: var(--blue);
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.btn-ghost:hover { background: var(--fill-2); }
+
+/* Destructive */
+.btn-danger {
+  background: transparent;
+  color: var(--red);
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.btn-danger:hover:not(:disabled) { background: var(--red-tint); }
+.btn-danger:disabled              { opacity: 0.35; cursor: not-allowed; }
+
+/* Header toolbar buttons */
+.btn-optimize {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s;
+  -webkit-app-region: no-drag;
+}
+.btn-optimize:hover { background: var(--blue-press); }
+
+.btn-add {
+  background: var(--fill-2);
+  color: var(--label-1);
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s;
+  -webkit-app-region: no-drag;
+}
+.btn-add:hover { background: var(--fill-1); }
+
+.btn-secondary {
+  background: var(--fill-2);
+  color: var(--label-2);
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  -webkit-app-region: no-drag;
+}
+.btn-secondary:hover { background: var(--fill-1); color: var(--label-1); }
+
+/* Right panel toggle — icon only */
+.btn-panel-toggle {
+  background: transparent;
+  border: none;
+  border-radius: var(--r-sm);
+  width: 30px;
+  height: 28px;
+  color: var(--label-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, color 0.12s;
+  -webkit-app-region: no-drag;
+}
+.btn-panel-toggle:hover { background: var(--fill-2); color: var(--label-1); }
+
+/* Combined sidebar icon + app title — left drawer toggle */
+.btn-title-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 4px 8px 4px 5px;
+  color: var(--label-2);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  -webkit-app-region: no-drag;
+}
+.btn-title-toggle:hover {
+  background: var(--fill-2);
+  color: var(--label-1);
+}
+.btn-title-toggle .app-logo {
+  font-size: 13px;
+  font-weight: 600;
+  color: inherit;
+  letter-spacing: -0.01em;
+}
+
+/* Gear icon */
+.btn-settings {
+  background: transparent;
+  border: none;
+  border-radius: var(--r-sm);
+  width: 28px;
+  height: 28px;
+  font-size: 15px;
+  color: var(--label-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, color 0.12s;
+  -webkit-app-region: no-drag;
+}
+.btn-settings:hover { background: var(--fill-2); color: var(--label-1); }
+
+/* Close / icon button */
+.icon-btn {
+  background: transparent;
+  border: none;
+  border-radius: var(--r-sm);
+  width: 22px;
+  height: 22px;
+  font-size: 10px;
+  color: var(--label-3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, color 0.12s;
+}
+.icon-btn:hover { background: var(--fill-2); color: var(--label-1); }
+
+/* Small button variant */
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+
+/* Link-style inline button */
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--blue);
+  cursor: pointer;
+  text-decoration: none;
+}
+.link-btn:hover          { text-decoration: underline; }
+.link-btn:disabled       { color: var(--label-3); cursor: default; text-decoration: none; }
+
+/* ─── Modal backdrop ──────────────────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(6px) brightness(0.97);
+  -webkit-backdrop-filter: blur(6px) brightness(0.97);
+  animation: fade-in 0.15s ease;
+}
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* Modal slide-up entry */
+.modal-backdrop > * {
+  animation: sheet-up 0.22s cubic-bezier(0.34, 1.20, 0.64, 1);
+}
+@keyframes sheet-up {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* ─── Legend bar ──────────────────────────────────────────────────────────── */
+.app-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 5px 20px;
+  background: var(--surface);
+  border-top: 0.5px solid var(--sep);
+  font-size: 11px;
+  color: var(--label-2);
+  flex-shrink: 0;
+}
+.legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+.legend-dot.taken     { background: var(--green); }
+.legend-dot.scheduled { background: var(--blue);  }
+.legend-dot.holiday   { background: var(--orange);}
+
+/* ─── Loading / error ─────────────────────────────────────────────────────── */
+.app-loading, .app-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 12px;
+  color: var(--label-2);
+  font-size: 13px;
+}
+.app-error h2 { color: var(--red); font-size: 17px; font-weight: 600; }
+.app-error pre {
+  font-size: 11px;
+  background: var(--red-tint);
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  color: var(--red);
+  max-width: 440px;
+}
+
+/* ─── Toast notification ──────────────────────────────────────────────────── */
+.export-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 30, 30, 0.88);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 18px;
+  border-radius: 999px;
+  box-shadow: var(--shadow-3);
+  z-index: 200;
+  animation: toast-pop 0.18s cubic-bezier(0.34, 1.40, 0.64, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.export-toast.toast-error { background: rgba(255, 59, 48, 0.88); }
+
+@keyframes toast-pop {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0)   scale(1);    }
+}
+
+/* ─── Shared form primitives (used by all modals) ─────────────────────────── */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.field-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--label-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.field-group input[type="text"],
+.field-group input[type="number"],
+.field-group input[type="date"],
+.field-group textarea {
+  background: var(--fill-3);
+  border: 0.5px solid var(--sep-hard);
+  border-radius: var(--r-sm);
+  padding: 6px 9px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--label-1);
+  width: 100%;
+  transition: border-color 0.12s, background 0.12s, box-shadow 0.12s;
+  -webkit-appearance: none;
+}
+.field-group input:focus,
+.field-group textarea:focus {
+  outline: none;
+  border-color: var(--blue);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18);
+}
+.field-group textarea { resize: vertical; font-size: 12px; line-height: 1.5; }
+
+.hint {
+  font-size: 11px;
+  color: var(--label-3);
+  font-weight: 400;
+}
+.error-msg {
+  font-size: 11px;
+  color: var(--red);
+  margin: 0;
+}
+
+/* Radio / checkbox shared */
+.radio-label, .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--label-1);
+  cursor: pointer;
+  padding: 1px 0;
+}
+.radio-label input[type="radio"],
+.checkbox-label input[type="checkbox"] {
+  accent-color: var(--blue);
+  width: 14px;
+  height: 14px;
+}

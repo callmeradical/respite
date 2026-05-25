@@ -1,0 +1,207 @@
+.left-panel {
+  min-width: 220px;
+  height: 100%;
+  background: var(--bg);
+  border-right: 0.5px solid var(--sep);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ── Section ── */
+.lp-section {
+  padding: 14px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lp-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--label-3);
+}
+
+.lp-divider {
+  height: 0.5px;
+  background: var(--sep);
+  flex-shrink: 0;
+}
+
+/* ── Remaining card ── */
+.remaining-card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  padding: 11px 13px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-left: 3px solid transparent;
+}
+.remaining-ok   { border-left-color: var(--green); }
+.remaining-over { border-left-color: var(--red); }
+
+.remaining-row {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.remaining-days {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--label-1);
+}
+.remaining-ok   .remaining-days { color: #1a7f37; }
+.remaining-over .remaining-days { color: var(--red); }
+
+.remaining-unit {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.45;
+  letter-spacing: 0;
+  margin-left: 1px;
+}
+
+.remaining-hrs {
+  font-size: 13px;
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.co-badge {
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 2px 8px;
+  align-self: flex-start;
+}
+.co-ok   { background: var(--green-tint); color: #1a7f37; }
+.co-over { background: var(--red-tint);   color: var(--red); }
+
+/* ── Mini stats ── */
+.mini-stats {
+  display: flex;
+  gap: 3px;
+}
+.mini-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 2px;
+  background: var(--surface);
+  border-radius: var(--r-sm);
+}
+.mini-val {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.mini-blue  { color: var(--blue);   }
+.mini-green { color: var(--green);  }
+.mini-teal  { color: var(--teal);   }
+
+.mini-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--label-3);
+}
+
+/* ── Progress ── */
+.lp-progress-track {
+  height: 3px;
+  background: var(--fill-2);
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+}
+.lp-progress-taken { background: var(--green); height: 100%; transition: width 0.3s ease; }
+.lp-progress-sched { background: var(--blue);  height: 100%; transition: width 0.3s ease; }
+
+.lp-hint {
+  font-size: 10px;
+  color: var(--label-3);
+  margin-top: -2px;
+}
+
+/* ── Action buttons ── */
+.lp-action {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 9px;
+  background: transparent;
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--label-1);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+.lp-action:hover            { background: var(--fill-2); }
+.lp-action:disabled         { opacity: 0.38; cursor: not-allowed; }
+.lp-action svg              { color: var(--blue); flex-shrink: 0; }
+
+/* ── Spacer ── */
+.lp-spacer { flex: 1; min-height: 8px; }
+
+/* ── Legend ── */
+.lp-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 14px;
+}
+.lp-leg-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: var(--label-2);
+}
+.lp-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.dot-taken     { background: var(--green);  }
+.dot-scheduled { background: var(--blue);   }
+.dot-holiday   { background: var(--orange); }
+
+/* ── Footer / Settings ── */
+.lp-footer { padding: 8px 10px 14px; }
+
+.lp-settings-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 9px;
+  background: transparent;
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--label-2);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
+}
+.lp-settings-btn:hover { background: var(--fill-2); color: var(--label-1); }
+.lp-settings-btn svg   { flex-shrink: 0; }

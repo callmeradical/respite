@@ -1,0 +1,117 @@
+.balance-bar {
+  background: var(--surface);
+  border-bottom: 0.5px solid var(--sep);
+  padding: 12px 20px 10px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+/* ── Stat tiles ───────────────────────────────────────────────────────────── */
+.balance-tiles {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: var(--bg);
+  border-radius: var(--r-md);
+  padding: 9px 14px 7px;
+  min-width: 100px;
+}
+
+/* Remaining tile — green = safe, red = over */
+.stat-tile.highlight {
+  background: var(--green-tint);
+  border-left: 3px solid var(--green);
+}
+.stat-tile.highlight.tile-over {
+  background: var(--red-tint);
+  border-left-color: var(--red);
+}
+.stat-tile.highlight.tile-danger {
+  background: var(--red-tint);
+  border-left-color: var(--red);
+}
+
+/* ── Numbers ── */
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.stat-value-unit {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  opacity: 0.55;
+  margin-left: 1px;
+}
+.stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--label-2);
+  margin-top: 5px;
+}
+.stat-sub {
+  font-size: 10px;
+  color: var(--label-3);
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+/* ── Carryover badge ── */
+.carryover-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0px 5px;
+  margin-left: 3px;
+}
+.carryover-badge.carryover-safe {
+  background: var(--green-tint);
+  color: #1a7f37;
+}
+.carryover-badge.carryover-over {
+  background: var(--red-tint);
+  color: var(--red);
+}
+
+/* ── Progress bar ── */
+.balance-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.balance-progress-track {
+  height: 3px;
+  background: var(--fill-2);
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+}
+.progress-segment {
+  height: 100%;
+  transition: width 0.35s ease;
+}
+.progress-segment.taken     { background: var(--green); }
+.progress-segment.scheduled { background: var(--blue);  }
+
+.progress-legend {
+  font-size: 10px;
+  color: var(--label-3);
+}

@@ -1,0 +1,147 @@
+.settings-panel {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-3);
+  width: 460px;
+  max-width: 96vw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 0.5px solid var(--sep);
+}
+.settings-header h2 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--label-1);
+  letter-spacing: -0.01em;
+}
+
+/* ── Body ── */
+.settings-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+  max-height: 62vh;
+}
+
+/* ── Grouped sections (fieldset) ── */
+fieldset {
+  border: none;
+  background: var(--bg);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+legend {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--label-2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0;
+  margin-bottom: 6px;
+  float: none;
+  width: 100%;
+}
+
+/* ── Form fields ── */
+.field-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--label-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.field-group input[type="number"],
+.field-group input[type="date"] {
+  background: var(--bg);
+  border: 0.5px solid var(--sep-hard);
+  border-radius: var(--r-sm);
+  padding: 6px 9px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--label-1);
+  width: 100%;
+  -webkit-appearance: none;
+  transition: border-color 0.12s, box-shadow 0.12s, background 0.12s;
+}
+.field-group input:focus {
+  outline: none;
+  border-color: var(--blue);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18);
+}
+
+/* ── Input + hint inline ── */
+.input-hint-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.input-hint-row input {
+  width: 110px !important;
+  flex-shrink: 0;
+}
+
+/* ── Carryover inline input ── */
+.carryover-input-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  margin-left: 22px;
+}
+.carryover-input-row input[type="number"] {
+  width: 80px;
+  background: var(--bg);
+  border: 0.5px solid var(--sep-hard);
+  border-radius: var(--r-sm);
+  padding: 5px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--label-1);
+  -webkit-appearance: none;
+}
+.carryover-input-row input:focus {
+  outline: none;
+  border-color: var(--blue);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18);
+}
+/* hide number spinners */
+.carryover-input-row input::-webkit-inner-spin-button,
+.carryover-input-row input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+.unit-label {
+  font-size: 12px;
+  color: var(--label-2);
+  font-weight: 500;
+}
+
+/* ── Footer ── */
+.settings-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 0.5px solid var(--sep);
+}
+
+.error-msg {
+  font-size: 11px;
+  color: var(--red);
+  margin: 0 20px 4px;
+}

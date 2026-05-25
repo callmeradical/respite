@@ -1,0 +1,142 @@
+.right-panel {
+  min-width: 252px;
+  height: 100%;
+  background: var(--surface);
+  border-left: 0.5px solid var(--sep);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ── Section ── */
+.rp-section {
+  padding: 14px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rp-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rp-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--label-3);
+}
+
+.rp-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--blue);
+  color: #fff;
+  border-radius: 999px;
+  padding: 1px 7px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.rp-summary {
+  font-size: 11px;
+  color: var(--label-3);
+  margin-top: -4px;
+}
+
+.rp-divider {
+  height: 0.5px;
+  background: var(--sep);
+  flex-shrink: 0;
+}
+
+/* ── Empty state ── */
+.rp-empty {
+  padding: 16px 0 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.rp-empty p {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--label-2);
+}
+.rp-empty-sub {
+  font-size: 11px !important;
+  color: var(--label-3) !important;
+  font-weight: 400 !important;
+}
+
+/* ── Entry list ── */
+.rp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* ── Entry card ── */
+.entry-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 9px 11px;
+  background: var(--bg);
+  border: none;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.12s;
+}
+.entry-card:hover { background: var(--fill-2); }
+
+.ec-date {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--label-1);
+  letter-spacing: -0.01em;
+}
+
+.ec-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.ec-days {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.ec-status {
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+.ec-scheduled { background: var(--blue-tint);  color: #0051a8; }
+.ec-taken     { background: var(--green-tint); color: #1a7f37; }
+
+.ec-proximity {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--label-3);
+}
+
+.ec-notes {
+  font-size: 11px;
+  color: var(--label-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

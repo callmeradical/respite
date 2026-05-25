@@ -1,0 +1,101 @@
+.entry-modal {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-3);
+  width: 420px;
+  max-width: 96vw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 10px;
+  border-bottom: 0.5px solid var(--sep);
+}
+.modal-header h2 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--label-1);
+}
+
+/* Segmented control for mode switching */
+.mode-tabs {
+  display: flex;
+  gap: 0;
+  background: var(--fill-2);
+  border-radius: var(--r-sm);
+  padding: 2px;
+}
+.mode-tab {
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--r-sm) - 2px);
+  padding: 4px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--label-2);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  font-family: inherit;
+}
+.mode-tab.active {
+  background: var(--surface);
+  color: var(--label-1);
+  box-shadow: var(--shadow-1);
+}
+
+/* ── Body ── */
+.modal-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.date-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* override global .field-group for the modal context */
+.modal-body .field-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--label-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.radio-row {
+  display: flex;
+  gap: 16px;
+}
+
+.input-hint-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.input-hint-row input { width: 90px !important; }
+
+/* ── Footer ── */
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-top: 0.5px solid var(--sep);
+}
+.footer-actions { display: flex; gap: 7px; }
+
+.error-msg {
+  font-size: 11px;
+  color: var(--red);
+  margin: 0 18px 4px;
+}
