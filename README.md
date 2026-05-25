@@ -1,8 +1,19 @@
 # Respite
 
-> A macOS desktop app for tracking, accruing, and optimizing paid time off.
+Most PTO trackers tell you what you've used. Respite tells you what you should use — and when.
 
-Respite is a native macOS app built with [Tauri](https://tauri.app) (Rust + React + TypeScript). It stores everything locally in SQLite — no accounts, no cloud, no subscriptions.
+It solves a specific problem: employees who accrue paid time off on a pay-period schedule often don't know their true available balance at any future point, end up forfeiting days at year-end, or schedule time off without realising they'll run a deficit. Respite fixes all three.
+
+**What it does:**
+- Computes your real balance at any future date — not just today's balance minus everything you've booked, but your accrued days *plus the days you'll earn before each event fires*
+- Warns you before you schedule more time off than you'll have accrued by the event start date
+- Finds the highest-ROI windows to take time off — days where a few PTO days bridge a holiday into a 7–10 day break
+- Tracks your year-end carryover limit and tells you exactly how many hours are at risk before Jan 1
+- Exports your PTO and holidays to a standards-compliant `.ics` file for import into any calendar app
+
+Everything is stored locally in SQLite. No accounts, no cloud, no subscriptions.
+
+Built with [Tauri](https://tauri.app) (Rust + React + TypeScript) for macOS.
 
 ---
 
