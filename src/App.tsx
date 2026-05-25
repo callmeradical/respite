@@ -74,8 +74,8 @@ export default function App() {
   }, [settings?.theme]);
 
   // ── ICS export ──────────────────────────────────────────────────────────────
-  async function handleExportICS(selected: TimeOffEntry[]) {
-    const ics = generateICS(selected);
+  async function handleExportICS(selected: TimeOffEntry[], selectedHolidays: Holiday[]) {
+    const ics = generateICS(selected, selectedHolidays);
     if (!ics) {
       setExportMsg('No events to export.');
       setTimeout(() => setExportMsg(null), 3000);
@@ -169,6 +169,7 @@ export default function App() {
           <LeftPanel
             summary={summary}
             settings={settings}
+            entries={entries}
             onAddEntry={() => setModal({ kind: 'addEntry', date: todayIso })}
             onImportHolidays={() => setModal({ kind: 'bulkHolidays' })}
             onExportICS={() => setModal({ kind: 'exportPicker' })}
@@ -253,6 +254,7 @@ export default function App() {
       {modal?.kind === 'exportPicker' && (
         <ExportModal
           entries={entries}
+          holidays={holidays}
           exporting={exporting}
           onExport={handleExportICS}
           onClose={closeModal}

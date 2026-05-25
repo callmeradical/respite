@@ -11,25 +11,31 @@
  */
 
 import { addDays, parseISO } from 'date-fns';
-import type { TimeOffEntry } from './types';
+import type { TimeOffEntry, Holiday } from './types';
 
 const PRODID = '-//Respite//Time Off Tracker//EN';
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
- * Generate a complete VCALENDAR string for the given PTO entries.
+ * Generate a complete VCALENDAR string for the given PTO entries and holidays.
  * The caller is responsible for filtering to the desired subset.
- * Returns null if the entry list is empty.
+ * Returns null if both lists are empty.
  */
-export function generateICS(entries: TimeOffEntry[]): string | null {
+export function generateICS(
+  entries: TimeOffEntry[],
+  holidays: Holiday[] = [],
+): string | null {
   const ptoEntries = entries.filter(e => e.entry_type === 'pto');
 
-  if (ptoEntries.length === 0) return null;
+  if (ptoEntries.length === 0 && holidays.length === 0) return null;
 
   const dtstamp = utcStamp(new Date());
 
-  const events = ptoEntries.map((e) => buildVEvent(e, dtstamp));
+  const events = [
+    ...ptoEntries.map((e) => buildVEvent(e, dtstamp)),
+    ...holidays.map((h) => buildHolidayVEvent(h, dtstamp)),
+  ];
 
   const lines = [
     'BEGIN:VCALENDAR',
@@ -42,6 +48,28 @@ export function generateICS(entries: TimeOffEntry[]): string | null {
   ];
 
   return lines.join('\r\n') + '\r\n';
+}
+
+// ─── Holiday VEVENT ───────────────────────────────────────────────────────────
+
+function buildHolidayVEvent(holiday: Holiday, dtstamp: string): string {
+  const dtStart = holiday.date.replace(/-/g, '');
+  // DTEND is exclusive — next day
+  const nextDay = toIcsDate(toLocalIso(addDays(parseISO(holiday.date), 1)));
+
+  const props = [
+    'BEGIN:VEVENT',
+    fold(`UID:${holiday.id}@respite-holiday`),
+    `DTSTAMP:${dtstamp}`,
+    `DTSTART;VALUE=DATE:${dtStart}`,
+    `DTEND;VALUE=DATE:${nextDay}`,
+    fold(`SUMMARY:${escapeText(holiday.name)}`),
+    'STATUS:CONFIRMED',
+    'TRANSP:TRANSPARENT', // shows as free (informational, not blocking)
+    'END:VEVENT',
+  ];
+
+  return props.join('\r\n');
 }
 
 // ─── VEVENT builder ───────────────────────────────────────────────────────────

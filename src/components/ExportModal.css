@@ -109,3 +109,11 @@
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
+
+.em-holiday-tag {
+  background: var(--orange-tint);
+  color: #b25a00;
+  border-radius: var(--r-xs);
+  padding: 1px 6px;
+  font-variant-numeric: normal;
+}

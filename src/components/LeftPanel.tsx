@@ -1,9 +1,12 @@
-import type { AccrualSummary, Settings } from '../lib/types';
+import { useMemo } from 'react';
+import type { AccrualSummary, Settings, TimeOffEntry } from '../lib/types';
+import { projectedBalanceAt } from '../lib/accrual';
 import './LeftPanel.css';
 
 interface Props {
   summary: AccrualSummary;
   settings: Settings;
+  entries: TimeOffEntry[];
   onAddEntry: () => void;
   onImportHolidays: () => void;
   onExportICS: () => void;
@@ -14,6 +17,7 @@ interface Props {
 export default function LeftPanel({
   summary,
   settings,
+  entries,
   onAddEntry,
   onImportHolidays,
   onExportICS,
@@ -29,8 +33,16 @@ export default function LeftPanel({
   const carryoverDays = settings.carryover_limit_hours != null
     ? settings.carryover_limit_hours / hpd : null;
 
-  // Carryover check is against what you'll actually have, not the stale "remaining"
-  const isOver = carryoverDays != null && availableNow > carryoverDays;
+  // Carryover is a year-end question: will you still hold more than the cap
+  // on Jan 1, after all your scheduled PTO fires and all remaining accrual
+  // happens? Compare against the Dec-31 projection, not today's balance.
+  const projectedYearEnd = useMemo(() => {
+    if (carryoverDays == null) return null;
+    const dec31 = new Date(new Date().getFullYear(), 11, 31);
+    return projectedBalanceAt(dec31, settings, entries);
+  }, [carryoverDays, settings, entries]);
+
+  const isOver = carryoverDays != null && projectedYearEnd != null && projectedYearEnd > carryoverDays;
 
   // Progress bar: taken + scheduled against total ever accrued
   const total         = openingBalance + totalAccrued;
@@ -58,11 +70,11 @@ export default function LeftPanel({
           </div>
           <span className="remaining-sublabel">available now</span>
 
-          {carryoverDays != null && (
+          {carryoverDays != null && projectedYearEnd != null && (
             <span className={`co-badge ${isOver ? 'co-over' : 'co-ok'}`}>
               {isOver
-                ? `▲ ${fmt((availableNow - carryoverDays) * hpd)} hrs over`
-                : `✓ ≤ ${settings.carryover_limit_hours} hr limit`}
+                ? `▲ ${fmt((projectedYearEnd - carryoverDays) * hpd)} hrs over at year-end`
+                : `✓ on track for year-end`}
             </span>
           )}
         </div>
