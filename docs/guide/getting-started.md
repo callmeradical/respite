@@ -39,4 +39,4 @@ When Respite launches for the first time it creates a local SQLite database and 
 - **Opening balance** — days you already held when you started tracking
 - **Year-end carryover limit** in hours (e.g. 40 hrs)
 
-See [Settings](./settings) for the full reference.
+See [Settings](./settings.md) for the full reference.
