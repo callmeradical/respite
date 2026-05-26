@@ -3,6 +3,7 @@ import { parseISO, format } from 'date-fns';
 import type { TimeOffEntry, Holiday, Settings, EntryType, EntryStatus } from '../lib/types';
 import { addEntry, updateEntry, deleteEntry, addHoliday, deleteHoliday } from '../lib/db';
 import { countWorkingDays, projectedBalanceAt, toIso } from '../lib/accrual';
+import { computeWindowEfficiency } from '../lib/optimizer';
 import './EntryModal.css';
 
 type Mode = 'entry' | 'holiday';
@@ -93,6 +94,13 @@ export default function EntryModal({
   const startDateLabel = startDate
     ? format(parseISO(startDate), 'MMM d')
     : '';
+
+  // Live efficiency grade — only for PTO entries with valid dates and days
+  const efficiency = useMemo(() => {
+    if (mode !== 'entry' || entryType !== 'pto') return null;
+    if (!startDate || !endDate || days <= 0) return null;
+    return computeWindowEfficiency(startDate, endDate, days, holidays);
+  }, [mode, entryType, startDate, endDate, days, holidays]);
 
   // Auto-calculate working days when dates change (unless user overrode)
   useEffect(() => {
@@ -293,6 +301,23 @@ export default function EntryModal({
                       </span>
                     </>
                   )}
+                </div>
+              )}
+
+              {/* Efficiency preview */}
+              {efficiency && (
+                <div className={`efficiency-preview eff-preview-${efficiency.tier}`}>
+                  <span className={`eff-multiplier eff-${efficiency.tier}`}>
+                    {efficiency.efficiency.toFixed(1)}×
+                  </span>
+                  <span className="eff-preview-text">
+                    {efficiency.totalDays} consecutive days off
+                    {efficiency.totalDays > days + Math.ceil(days / 5) * 2
+                      ? ' — great use of surrounding free days'
+                      : efficiency.tier === 'fair'
+                      ? ' — no adjacent weekends or holidays'
+                      : ''}
+                  </span>
                 </div>
               )}
 

@@ -140,3 +140,16 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ── Efficiency grade badge ── */
+.ec-efficiency {
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  margin-left: auto;   /* push to the right edge of the meta row */
+}
+.eff-great { color: var(--green);   }
+.eff-good  { color: var(--blue);    }
+.eff-ok    { color: var(--label-2); }
+.eff-fair  { color: var(--label-4); }

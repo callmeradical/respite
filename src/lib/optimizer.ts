@@ -62,12 +62,48 @@ export interface YearEndWarning {
   suggestion: string;
 }
 
+/**
+ * Grade for a single PTO entry — how well did the dates leverage
+ * surrounding free days (weekends + holidays)?
+ */
+export interface EfficiencyResult {
+  /** Total consecutive calendar days off, including adjacent free days */
+  totalDays: number;
+  /** totalDays / ptoDays — the efficiency multiplier */
+  efficiency: number;
+  /** Colour tier for display */
+  tier: 'great' | 'good' | 'ok' | 'fair';
+}
+
 export interface SpreadAdvice {
   daysRemaining: number;        // current balance
   totalAvailable: number;       // balance + remaining accrual this year
   monthsRemaining: number;
   idealPerMonth: number;        // totalAvailable / monthsRemaining
   idealPerWeek: number;         // totalAvailable / weeks remaining
+}
+
+/**
+ * One row in the PTO usage report.
+ * Represents the best consecutive-day window achievable by spending
+ * exactly `ptoDays` new PTO days (Pareto-optimal: only included when
+ * `totalDays` is strictly greater than all rows with fewer PTO days).
+ */
+export interface PtoUsageRow {
+  /** New PTO days required to unlock this window */
+  ptoDays: number;
+  /** Total consecutive calendar days off */
+  totalDays: number;
+  /** Days already free (weekends + holidays + existing booked PTO) */
+  freeDays: number;
+  start: string;   // ISO YYYY-MM-DD
+  end: string;     // ISO YYYY-MM-DD
+  /** Holiday names that anchor this window */
+  anchors: string[];
+  /** PTO days yet to be accrued before the window starts */
+  yetToAccrue: number;
+  /** Day-by-day breakdown for the mini timeline */
+  days: RecommendedDay[];
 }
 
 // ─── Day-map helpers ──────────────────────────────────────────────────────────
@@ -307,7 +343,140 @@ export function generateRecommendations(
   return result;
 }
 
-// ─── 2. Balance projection ────────────────────────────────────────────────────
+// ─── 2. PTO usage report ──────────────────────────────────────────────────────
+//
+// For each possible PTO spend (1 … floor(availableNow)), find the window in
+// the next `horizonDays` that yields the most consecutive calendar days off.
+// Only Pareto-optimal rows are returned: a row for N PTO days is included only
+// when it produces strictly more consecutive days than any row with fewer days.
+
+export function buildPtoUsageReport(
+  summary: AccrualSummary,
+  settings: Settings,
+  entries: TimeOffEntry[],
+  holidays: Holiday[],
+  horizonDays = 365,
+  maxWindowDays = 30,
+): PtoUsageRow[] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayIso = toIso(today);
+
+  const balanceNow = summary.availableNow;
+  const maxBudget = Math.floor(balanceNow);
+  if (maxBudget < 1) return [];
+
+  const accrualStart = parseISO(settings.accrual_start_date);
+  const periodsPerYear = settings.pay_period_cadence === 'biweekly' ? 26 : 24;
+  const ratePerPeriod = settings.days_per_year / periodsPerYear;
+  const periodsToday = countPayPeriods(accrualStart, today, settings.pay_period_cadence);
+
+  const futureScheduled = entries
+    .filter(e => e.entry_type === 'pto' && e.status === 'scheduled' && e.end_date >= todayIso)
+    .sort((a, b) => a.end_date.localeCompare(b.end_date));
+
+  const map = buildDayMap(today, horizonDays, entries, holidays);
+  const n = map.length;
+
+  interface BestWindow {
+    totalDays: number;
+    startIdx: number;
+    endIdx: number;
+    freeDays: number;
+    anchors: string[];
+    yetToAccrue: number;
+  }
+
+  // For each exact PTO day count, keep the window with the most consecutive days
+  const bestByPto = new Map<number, BestWindow>();
+
+  let schedPtr = 0;
+  let schedBefore = 0;
+
+  for (let s = 0; s < n; s++) {
+    // Advance past scheduled entries that end before this window starts
+    while (
+      schedPtr < futureScheduled.length &&
+      futureScheduled[schedPtr].end_date < map[s].iso
+    ) {
+      schedBefore += futureScheduled[schedPtr].days;
+      schedPtr++;
+    }
+
+    const periodsToStart = countPayPeriods(accrualStart, map[s].date, settings.pay_period_cadence);
+    const yetToAccrue = (periodsToStart - periodsToday) * ratePerPeriod;
+    const budget = Math.min(maxBudget, Math.floor(balanceNow + yetToAccrue - schedBefore));
+    if (budget < 1) continue;
+
+    let freeDays = 0;
+    let ptoDays = 0;
+    const anchors: string[] = [];
+
+    for (let e = s; e < n && e - s < maxWindowDays; e++) {
+      const day = map[e];
+      if (day.isFree) {
+        freeDays++;
+        if (day.isHoliday && day.holidayName && !anchors.includes(day.holidayName)) {
+          anchors.push(day.holidayName);
+        }
+      } else {
+        ptoDays++;
+      }
+
+      if (ptoDays > budget) break;
+      if (ptoDays === 0) continue;
+
+      const totalDays = e - s + 1;
+      const existing = bestByPto.get(ptoDays);
+      if (!existing || totalDays > existing.totalDays) {
+        bestByPto.set(ptoDays, {
+          totalDays,
+          startIdx: s,
+          endIdx: e,
+          freeDays,
+          anchors: [...anchors],
+          yetToAccrue: Math.max(0, yetToAccrue),
+        });
+      }
+    }
+  }
+
+  // Build Pareto frontier: only emit rows where totalDays strictly improves
+  const result: PtoUsageRow[] = [];
+  let maxConsecutive = 0;
+
+  for (let b = 1; b <= maxBudget; b++) {
+    const best = bestByPto.get(b);
+    if (!best || best.totalDays <= maxConsecutive) continue;
+    maxConsecutive = best.totalDays;
+
+    const { startIdx, endIdx, freeDays, anchors, yetToAccrue } = best;
+    const days: RecommendedDay[] = map.slice(startIdx, endIdx + 1).map((d) => ({
+      iso: d.iso,
+      dow: d.dow,
+      isWeekend: d.isWeekend,
+      isHoliday: d.isHoliday,
+      isExistingPTO: d.isExistingPTO,
+      isNewPTO: !d.isFree,
+      holidayName: d.holidayName,
+    }));
+
+    result.push({
+      ptoDays: b,
+      totalDays: best.totalDays,
+      freeDays,
+      start: map[startIdx].iso,
+      end: map[endIdx].iso,
+      anchors,
+      yetToAccrue: r2(yetToAccrue),
+      days,
+    });
+  }
+
+  return result;
+}
+
+// ─── 3. Balance projection ────────────────────────────────────────────────────
 //
 // Iterative approach: walk month-by-month from today, adding accrual and
 // subtracting scheduled PTO.  At each Jan 1 crossing, apply the carryover cap
@@ -526,6 +695,57 @@ export function buildSpreadAdvice(
     idealPerMonth:  r2(totalAvailable / monthsRemaining),
     idealPerWeek:   r2(totalAvailable / weeksRemaining),
   };
+}
+
+// ─── 6. Window efficiency ─────────────────────────────────────────────────────
+//
+// Computes how efficiently a PTO entry uses its days by expanding outward from
+// the entry's own date range to include adjacent weekends and holidays.
+// Example: Mon–Fri (5 PTO days) → Sat + Mon–Fri + Sat–Sun = 9 consecutive days → 1.8×
+// Example: Mon–Wed before Thanksgiving → Sat + Mon–Wed + Thu (holiday) + Fri + Sat–Sun = 9 days → 3.0×
+
+export function computeWindowEfficiency(
+  startDate: string,
+  endDate: string,
+  ptoDays: number,
+  holidays: Holiday[],
+): EfficiencyResult {
+  const noGrade: EfficiencyResult = { totalDays: 0, efficiency: 0, tier: 'fair' };
+  if (ptoDays <= 0 || !startDate || !endDate) return noGrade;
+
+  const holidaySet = new Set(holidays.map((h) => h.date));
+
+  function isFree(d: Date): boolean {
+    const dow = d.getDay();
+    return dow === 0 || dow === 6 || holidaySet.has(toIso(d));
+  }
+
+  let winStart = parseISO(startDate);
+  let winEnd   = parseISO(endDate);
+
+  // Expand backward into adjacent free days
+  let prev = addDays(winStart, -1);
+  while (isFree(prev)) {
+    winStart = prev;
+    prev = addDays(prev, -1);
+  }
+
+  // Expand forward into adjacent free days
+  let next = addDays(winEnd, 1);
+  while (isFree(next)) {
+    winEnd = next;
+    next = addDays(next, 1);
+  }
+
+  const totalDays = differenceInDays(winEnd, winStart) + 1;
+  const efficiency = Math.round((totalDays / ptoDays) * 100) / 100;
+  const tier: EfficiencyResult['tier'] =
+    efficiency >= 4   ? 'great'
+    : efficiency >= 2.5 ? 'good'
+    : efficiency >= 1.5 ? 'ok'
+    : 'fair';
+
+  return { totalDays, efficiency, tier };
 }
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────

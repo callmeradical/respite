@@ -6,6 +6,7 @@ import {
   buildBalanceProjection,
   buildYearEndWarning,
   buildSpreadAdvice,
+  buildPtoUsageReport,
 } from '../lib/optimizer';
 import type {
   Recommendation,
@@ -13,10 +14,11 @@ import type {
   ProjectionPoint,
   YearEndWarning,
   SpreadAdvice,
+  PtoUsageRow,
 } from '../lib/optimizer';
 import './OptimizeModal.css';
 
-type Tab = 'recommendations' | 'forecast';
+type Tab = 'recommendations' | 'forecast' | 'report';
 
 const CATEGORIES: { key: RecommendationCategory; label: string; desc: string }[] = [
   { key: 'long-weekend', label: 'Long weekends', desc: '3–5 days · best ROI' },
@@ -61,6 +63,11 @@ export default function OptimizeModal({
     [settings, summary.remaining],
   );
 
+  const report = useMemo(
+    () => buildPtoUsageReport(summary, settings, entries, holidays),
+    [summary, settings, entries, holidays],
+  );
+
   const activRecs = recs[activeCat] ?? [];
 
   return (
@@ -92,6 +99,12 @@ export default function OptimizeModal({
           >
             Balance forecast
           </button>
+          <button
+            className={`opt-tab ${tab === 'report' ? 'active' : ''}`}
+            onClick={() => setTab('report')}
+          >
+            PTO report
+          </button>
         </div>
 
         {/* ── Body ── */}
@@ -105,12 +118,18 @@ export default function OptimizeModal({
               onSchedule={onSchedule}
               remaining={summary.remaining}
             />
-          ) : (
+          ) : tab === 'forecast' ? (
             <ForecastTab
               projection={projection}
               warning={warning}
               spread={spread}
               settings={settings}
+            />
+          ) : (
+            <ReportTab
+              rows={report}
+              availableNow={summary.availableNow}
+              onSchedule={onSchedule}
             />
           )}
         </div>
@@ -509,6 +528,157 @@ function BalanceChart({
         Today
       </text>
     </svg>
+  );
+}
+
+// ─── PTO report tab ───────────────────────────────────────────────────────────
+
+function ReportTab({
+  rows,
+  availableNow,
+  onSchedule,
+}: {
+  rows: PtoUsageRow[];
+  availableNow: number;
+  onSchedule: (s: string, e: string) => void;
+}) {
+  if (rows.length === 0) {
+    return (
+      <div className="opt-empty">
+        {availableNow < 1
+          ? 'No PTO balance to plan with.'
+          : 'No consecutive-day windows found in the next 12 months.'}
+      </div>
+    );
+  }
+
+  const best = rows[rows.length - 1];
+
+  return (
+    <div className="report-content">
+      {/* Hero stat */}
+      <div className="report-hero">
+        <div className="report-hero-main">
+          <span className="report-hero-days">{best.totalDays}</span>
+          <span className="report-hero-label">consecutive days off</span>
+        </div>
+        <p className="report-hero-sub">
+          Best break achievable using all&nbsp;
+          <strong>{fmt(availableNow)}</strong> available PTO days.
+          Each row below shows the longest stretch unlocked by spending
+          that many days.
+        </p>
+      </div>
+
+      {/* Rows */}
+      <div className="report-list">
+        {rows.map((row) => (
+          <ReportCard key={`${row.ptoDays}-${row.start}`} row={row} onSchedule={onSchedule} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ReportCard({
+  row,
+  onSchedule,
+}: {
+  row: PtoUsageRow;
+  onSchedule: (s: string, e: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const startLabel = format(parseISO(row.start), 'EEE, MMM d');
+  const endLabel   = format(parseISO(row.end),   'EEE, MMM d, yyyy');
+
+  return (
+    <div className="report-card" onClick={() => setExpanded((x) => !x)}>
+      {/* Row summary */}
+      <div className="report-card-header">
+        <div className="report-card-left">
+          <span className="report-pto-badge">
+            {row.ptoDays} PTO day{row.ptoDays !== 1 ? 's' : ''}
+          </span>
+          <span className="report-arrow">→</span>
+          <span className="report-total-days">{row.totalDays} days off</span>
+        </div>
+        <div className="report-card-right">
+          <span className="report-dates">{startLabel} – {endLabel}</span>
+          {row.anchors.length > 0 && (
+            <span className="report-anchors">{row.anchors.join(' · ')}</span>
+          )}
+        </div>
+        <span className="report-chevron">{expanded ? '▲' : '▼'}</span>
+      </div>
+
+      {/* Expandable detail */}
+      {expanded && (
+        <div className="report-card-detail" onClick={(e) => e.stopPropagation()}>
+          {/* Stat chips */}
+          <div className="rec-stats">
+            <span className="stat-chip chip-total">{row.totalDays} days off</span>
+            <span className="stat-chip chip-pto">{row.ptoDays} PTO day{row.ptoDays !== 1 ? 's' : ''}</span>
+            <span className="stat-chip chip-free">{row.freeDays} already free</span>
+            {row.yetToAccrue > 0 && (
+              <span className="stat-chip chip-earn" title="Days you'll earn before this window starts">
+                +{fmt(row.yetToAccrue)}d to earn
+              </span>
+            )}
+          </div>
+
+          {/* Mini timeline */}
+          <div className="rec-timeline">
+            {row.days.map((d) => {
+              const cls = d.isHoliday
+                ? 'tl-holiday'
+                : d.isExistingPTO
+                ? 'tl-existing'
+                : d.isWeekend
+                ? 'tl-weekend'
+                : d.isNewPTO
+                ? 'tl-new-pto'
+                : 'tl-work';
+              return (
+                <div
+                  key={d.iso}
+                  className={`tl-cell ${cls}`}
+                  title={
+                    d.holidayName
+                      ? d.holidayName
+                      : d.isExistingPTO
+                      ? 'Existing PTO'
+                      : d.isWeekend
+                      ? 'Weekend'
+                      : d.isNewPTO
+                      ? 'Take PTO'
+                      : 'Workday'
+                  }
+                >
+                  <span className="tl-dow">{DOW_ABBR[d.dow]}</span>
+                  <span className="tl-day">{parseInt(d.iso.slice(8), 10)}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Footer */}
+          <div className="rec-footer">
+            <div className="tl-legend">
+              <span className="leg-dot tl-new-pto" /> PTO
+              <span className="leg-dot tl-weekend" /> Weekend
+              <span className="leg-dot tl-holiday" /> Holiday
+              <span className="leg-dot tl-existing" /> Already booked
+            </div>
+            <button
+              className="btn-primary btn-sm"
+              onClick={() => onSchedule(row.start, row.end)}
+            >
+              + Schedule
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

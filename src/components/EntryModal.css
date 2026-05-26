@@ -130,3 +130,37 @@
   color: var(--red);
   margin: 0 18px 4px;
 }
+
+/* ── Efficiency preview ── */
+.efficiency-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--r-sm);
+  padding: 7px 10px;
+  background: var(--fill-2);
+}
+.efficiency-preview.eff-preview-great { background: var(--green-tint); }
+.efficiency-preview.eff-preview-good  { background: var(--blue-tint);  }
+.efficiency-preview.eff-preview-ok    { background: var(--fill-2);     }
+.efficiency-preview.eff-preview-fair  { background: var(--fill-2);     }
+
+.eff-multiplier {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.eff-preview-text {
+  font-size: 11px;
+  color: var(--label-2);
+  line-height: 1.4;
+}
+
+/* Colour classes shared across RightPanel and EntryModal */
+.eff-great { color: var(--green);   }
+.eff-good  { color: var(--blue);    }
+.eff-ok    { color: var(--label-2); }
+.eff-fair  { color: var(--label-4); }

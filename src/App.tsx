@@ -193,6 +193,7 @@ export default function App() {
         <div className={`panel-wrap panel-right-wrap${rightOpen ? '' : ' panel-closed'}`}>
           <RightPanel
             entries={entries}
+            holidays={holidays}
             onEntryClick={(entry) => setModal({ kind: 'editEntry', entry })}
           />
         </div>

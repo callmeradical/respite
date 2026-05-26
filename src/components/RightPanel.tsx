@@ -1,13 +1,15 @@
 import { format, parseISO } from 'date-fns';
-import type { TimeOffEntry } from '../lib/types';
+import type { TimeOffEntry, Holiday } from '../lib/types';
+import { computeWindowEfficiency } from '../lib/optimizer';
 import './RightPanel.css';
 
 interface Props {
   entries: TimeOffEntry[];
+  holidays: Holiday[];
   onEntryClick: (entry: TimeOffEntry) => void;
 }
 
-export default function RightPanel({ entries, onEntryClick }: Props) {
+export default function RightPanel({ entries, holidays, onEntryClick }: Props) {
   const todayIso = new Date().toISOString().slice(0, 10);
 
   const upcoming = entries
@@ -47,6 +49,7 @@ export default function RightPanel({ entries, onEntryClick }: Props) {
                 <EntryCard
                   key={entry.id}
                   entry={entry}
+                  holidays={holidays}
                   onClick={() => onEntryClick(entry)}
                 />
               ))}
@@ -68,6 +71,7 @@ export default function RightPanel({ entries, onEntryClick }: Props) {
                 <EntryCard
                   key={entry.id}
                   entry={entry}
+                  holidays={holidays}
                   onClick={() => onEntryClick(entry)}
                 />
               ))}
@@ -84,9 +88,11 @@ export default function RightPanel({ entries, onEntryClick }: Props) {
 
 function EntryCard({
   entry,
+  holidays,
   onClick,
 }: {
   entry: TimeOffEntry;
+  holidays: Holiday[];
   onClick: () => void;
 }) {
   const start = parseISO(entry.start_date);
@@ -106,6 +112,11 @@ function EntryCard({
   const daysAway  = daysBetween(todayIso, entry.start_date);
   const proximity = getProximityLabel(daysAway, entry.status);
 
+  // Efficiency grade — only meaningful for PTO entries with at least 1 day
+  const efficiency = entry.entry_type === 'pto' && entry.days > 0
+    ? computeWindowEfficiency(entry.start_date, entry.end_date, entry.days, holidays)
+    : null;
+
   return (
     <button className="entry-card" onClick={onClick}>
       <div className="ec-date">{dateLabel}</div>
@@ -117,6 +128,14 @@ function EntryCard({
         </span>
         {proximity && (
           <span className="ec-proximity">{proximity}</span>
+        )}
+        {efficiency && (
+          <span
+            className={`ec-efficiency eff-${efficiency.tier}`}
+            title={`${efficiency.totalDays} consecutive days off (${efficiency.efficiency.toFixed(1)}× efficiency)`}
+          >
+            {efficiency.efficiency.toFixed(1)}×
+          </span>
         )}
       </div>
 

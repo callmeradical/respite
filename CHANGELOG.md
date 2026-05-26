@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0] — 2026-05-26
+
+### Added
+- **PTO report** — new "PTO report" tab in the Optimize modal; shows the Pareto-optimal set of consecutive-day windows achievable for each number of PTO days spent (e.g. "use 3 days → 9 consecutive days off"); each row is expandable with a mini timeline and a direct Schedule button
+- **Efficiency grading** — every PTO entry now carries a live efficiency rating (`N.N×`) showing how many consecutive calendar days the entry yields relative to PTO days consumed; computed by expanding the booked range outward to absorb adjacent weekends and holidays; color-coded green / blue / gray / muted for great / good / ok / fair
+- **Efficiency badge on entry cards** — the right panel shows the grade inline on each scheduled and past PTO card, with a tooltip giving the full consecutive-day count
+- **Live efficiency preview in the Add/Edit modal** — as dates are selected the modal instantly shows the multiplier and a plain-language description of the consecutive break; tinted green for great windows, blue for good
+
 ## [1.3.0] — 2026-05-25
 
 ### Added

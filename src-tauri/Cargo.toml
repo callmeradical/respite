@@ -1,6 +1,6 @@
 [package]
 name = "respite"
-version = "1.3.0"
+version = "1.5.0"
 description = "macOS PTO tracker with accrual engine and time-off optimizer"
 authors = ["Lars Cromley"]
 edition = "2021"
